@@ -3,18 +3,21 @@
 	
 	Created by:  Robert D. Rathbun
 	Date Created:  November 11, 2013
-	For use by:  Marianna Airomotive Corporation
+	For use by:  
+	
+		Edits:
+		07/28/2016 - Sanitized script
 ---------------------------------------------------------- #>
 
 # Check ComputerName.  If it is not the correct server, exit script.
-	If (([Environment]::MachineName) -ne "MAERP") {
+	If (([Environment]::MachineName) -ne "SomeServerName") {
 		Exit
 	}
 
 # Define Variables
 	$Username = [Environment]::UserName
 	
-	$ErpRoot = "C:\Erplite"
+	$ErpRoot = "C:\SomeFolderName"
 	$ErpPath = "$ErpRoot\$UserName"
 		# This variable reads the contents of "_live.txt" and enumerates the last line of the file.
 		$LiveFileName = (Get-Content "$ErpRoot\erpadmin\_live.txt")[-1]
