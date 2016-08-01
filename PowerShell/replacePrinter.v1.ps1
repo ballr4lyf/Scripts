@@ -13,8 +13,8 @@
                 1.1 Added Header Text for CSV file
 #>
 Param (
-    $newPrintServer = "GCCBFS01",
-    $PrinterLog = "\\GCCBFS01\PrintMigration$\PrintMigration.csv"
+    $newPrintServer = "NewPrintServerName",
+    $PrinterLog = "\\NewPrintServerName\PrintMigration$\PrintMigration.csv"
 )
 <#
     #Header for CSV log file:
@@ -23,12 +23,12 @@ Param (
 #>
 Try {
     Write-Verbose ("{0}: Checking for printers mapped to old print server" -f $Env:USERNAME)
-    $printers = @(Get-WmiObject -Class Win32_Printer -Filter "SystemName='\\\\gccba2i'" -ErrorAction Stop)
+    $printers = @(Get-WmiObject -Class Win32_Printer -Filter "SystemName='\\\\OldPrintServerName'" -ErrorAction Stop)
     
     If ($printers.count -gt 0) {        
         ForEach ($printer in $printers) {
             Write-Verbose ("{0}: Replacing with new print server name: {1}" -f $Printer.Name,$newPrintServer)
-            $newPrinter = $printer.Name -replace "Server1",$newPrintServer  
+            $newPrinter = $printer.Name -replace "OldPrintServerName",$newPrintServer  
             $returnValue = ([wmiclass]"Win32_Printer").AddPrinterConnection($newPrinter).ReturnValue                
             If ($returnValue -eq 0) {
                 "{0},{1},{2},{3},{4},{5}" -f $Env:COMPUTERNAME,
