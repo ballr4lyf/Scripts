@@ -6,18 +6,28 @@
 
     Note:
     1.  Invoke-WebRequest requires PowerShell v3 or higher.
+    2.  The PC/Server will still need to be rebooted after install.
 #>
 
 $URL = "http://downloads.dattobackup.com/ShadowSnap/DattoWindowsAgent51.exe"
 $installDir = "C:\Kits"
 $installer = $installDir + "\DattoWindowsAgent51.exe"
 
-If (!(Test-Path $installDir)) {
-    New-Item $installDir -ItemType Directory
-} ElseIf (Test-Path $installer) {
-    Remove-Item -Force $installer
+
+# Check PowerShell version is greater than or equal to 3.
+If ($PSVersionTable.PSVersion.Major -ge 3) {
+
+    # Check for folder path and install file.
+    If (!(Test-Path $installDir)) {
+        New-Item $installDir -ItemType Directory
+    } ElseIf (Test-Path $installer) {
+        Remove-Item -Force $installer
+    }
+
+    Invoke-WebRequest -Uri $URL -OutFile $installer #Download the Datto Windows Agent.
+
+    Start-Process $installer -ArgumentList "/S"  #Silent install.
+} Else {
+    Write-Output "Script requires PowerShell version 3 or higher."
+    Exit
 }
-
-Invoke-WebRequest -Uri $URL -OutFile $installer #Download the Datto Windows Agent.
-
-Start-Process $installer -ArgumentList "/S"  #Silent install.
