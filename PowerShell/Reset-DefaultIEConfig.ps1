@@ -22,9 +22,9 @@ If (!(Get-PSDrive HKU)) {
 Set-Location HKU:\
 
 Get-ChildItem -Path HKU:\ | ForEach-Object {
-    If (($_.Name -match '.\S-[0-9]-.') -and (($_.Name).Length -gt 50) -and (($_.Name).Length -lt 59)) {
+    If (($_.Name -match '.\S-[0-9]-.') -and (($_.Name).Length -gt 30) -and !($_.Name -match '.X*Classes')) {
         If (Test-Path ($_.PSPath + "\Software\Microsoft\Internet Explorer")) {
-            Remove-Item ("Registry::" + $_.name + "\Software\Microsoft\Internet Explorer") -Recurse -Force
+            Remove-Item ($_.PSPath + "\Software\Microsoft\Internet Explorer") -Recurse -Force
         }
     }
 }
