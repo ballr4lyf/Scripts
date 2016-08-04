@@ -11,14 +11,20 @@
 
 RunDll32.exe InetCpl.cpl,ResetIEtoDefaults #>
 
-If (!(Get-PSDrive -Name HKU)) {
+If (Get-Process -Name iexplore) {
+    Stop-Process -Name iexplore -Force
+}
+
+If (!(Get-PSDrive HKU)) {
     New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
 }
 
 Set-Location HKU:\
 
-foreach ($user in (Get-ChildItem -Path HKU:\)) {
-    If (Test-Path ("Registry::" + $user.name + "Software\Microsoft\Internet Explorer")) {
-        Remove-Item ("Registry::" + $user.name + "Software\Microsoft\Internet Explorer") -Force
+Get-ChildItem -Path HKU:\ | ForEach-Object {
+    If (($_.Name -match '.\S-[0-9]-.') -and (($_.Name).Length -gt 50) -and (($_.Name).Length -lt 59)) {
+        If (Test-Path ($_.PSPath + "\Software\Microsoft\Internet Explorer")) {
+            Remove-Item ("Registry::" + $_.name + "\Software\Microsoft\Internet Explorer") -Recurse -Force
+        }
     }
 }
