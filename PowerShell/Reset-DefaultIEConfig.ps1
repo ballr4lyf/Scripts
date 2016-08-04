@@ -24,6 +24,11 @@ Set-Location HKU:\
 Get-ChildItem -Path HKU:\ | ForEach-Object {
     If (($_.Name -match '.\S-[0-9]-.') -and (($_.Name).Length -gt 30) -and !($_.Name -match '.X*Classes')) {
         If (Test-Path ($_.PSPath + "\Software\Microsoft\Internet Explorer")) {
+            $iExplorer = Get-Item ($_.Name + "\Software\Microsoft\Internet Explorer")
+            Get-ChildItem $iExplorer.PSPath -Recurse | ForEach-Object {
+                Get-ItemProperty -Path ("Registry::" + $_.Name) | Remove-ItemProperty -Name "*" -Force
+            }
+            Get-ItemProperty -Path $iExplorer.PSPath | Remove-ItemProperty -Name "*" -Force
             Remove-Item ($_.PSPath + "\Software\Microsoft\Internet Explorer") -Recurse -Force
         }
     }
