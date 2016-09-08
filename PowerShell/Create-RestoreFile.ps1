@@ -24,5 +24,8 @@ foreach ($drive in $drives) {
         New-Item -Path $folder -ItemType "file" -Name $file -Value $body
 
         If (Test-Path ($drive.DriveLetter + "\BackupTests\" + $file)) {Rename-Item ($drive.DriveLetter + "\BackupTests\" + $file) -NewName "Restored.txt"}
+      <#  If (Test-Path ($drive.DriveLetter + "\BackupTests\Restored.txt") {
+            
+        } #>
     }
 }
