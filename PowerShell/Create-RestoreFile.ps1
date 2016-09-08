@@ -7,6 +7,8 @@
 #>
 
 $drives = Get-WmiObject -Class Win32_Volume | ?{$_.DriveType -eq 3}
+$DateTime = Get-Date
+$hostname = $env:COMPUTERNAME
 
 foreach ($drive in $drives) {
     If ($drive.DriveLetter[0] -ne $null) {
@@ -17,7 +19,8 @@ foreach ($drive in $drives) {
         If (Test-Path (Join-Path -Path $folder -ChildPath $file)) {
             Remove-Item -Path (Join-Path -Path $folder -ChildPath $file) -Force
         }
+        $body = "Computer Name:  " + $hostname + "`r`n Drive Letter:  " + $drive.DriveLetter[0] + "`r`n File Creation Date:  " + $DateTime
 
-        New-Item -Path $folder -ItemType "file" -Name $file -Value (Get-Date)
+        New-Item -Path $folder -ItemType "file" -Name $file -Value $body
     }
 }
