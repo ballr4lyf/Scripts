@@ -19,8 +19,10 @@ foreach ($drive in $drives) {
         If (Test-Path (Join-Path -Path $folder -ChildPath $file)) {
             Remove-Item -Path (Join-Path -Path $folder -ChildPath $file) -Force
         }
-        $body = "Computer Name:  " + $hostname + "`r`n Drive Letter:  " + $drive.DriveLetter[0] + "`r`n File Creation Date:  " + $DateTime
+        $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $DateTime
 
         New-Item -Path $folder -ItemType "file" -Name $file -Value $body
+
+        If (Test-Path ($drive.DriveLetter + "\BackupTests\" + $file)) {Rename-Item ($drive.DriveLetter + "\BackupTests\" + $file) -NewName "Restored.txt"}
     }
 }
