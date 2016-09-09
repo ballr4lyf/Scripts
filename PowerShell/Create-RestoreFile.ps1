@@ -9,6 +9,7 @@
 $drives = Get-WmiObject -Class Win32_Volume | ?{$_.DriveType -eq 3}
 $today = Get-Date
 $hostname = $env:COMPUTERNAME
+$driveLetters = @()
 
 foreach ($drive in $drives) {
     If ($drive.DriveLetter[0] -ne $null) {
@@ -32,6 +33,9 @@ foreach ($drive in $drives) {
         }
         If (Test-Path ($drive.DriveLetter + "\BackupTests\Restored.txt")) {
             $restoredFile = Get-Item ($drive.DriveLetter + "\BackupTests\Restored.txt")
+            If ($restoredFile.LastWriteTime -gt $today.AddDays(-90)) {
+                $driveLetters += $drive.DriveLetter
+            }
         }
     }
 }
