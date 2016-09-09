@@ -7,7 +7,7 @@
 #>
 
 $drives = Get-WmiObject -Class Win32_Volume | ?{$_.DriveType -eq 3}
-$DateTime = Get-Date
+$today = Get-Date
 $hostname = $env:COMPUTERNAME
 
 foreach ($drive in $drives) {
@@ -19,13 +19,19 @@ foreach ($drive in $drives) {
         If (Test-Path (Join-Path -Path $folder -ChildPath $file)) {
             Remove-Item -Path (Join-Path -Path $folder -ChildPath $file) -Force
         }
-        $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $DateTime
+        $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $today
 
         New-Item -Path $folder -ItemType "file" -Name $file -Value $body
 
-        If (Test-Path ($drive.DriveLetter + "\BackupTests\" + $file)) {Rename-Item ($drive.DriveLetter + "\BackupTests\" + $file) -NewName "Restored.txt"}
-      <#  If (Test-Path ($drive.DriveLetter + "\BackupTests\Restored.txt") {
-            
-        } #>
+        If (Test-Path ($drive.DriveLetter + "\BackupTests\" + $file)) {
+            Rename-Item ($drive.DriveLetter + "\BackupTests\" + $file) -NewName "Restored.txt"
+
+            $restoredDate = (Get-Date).AddDays(-1)
+            $restoredDate = Get-Date $restoredDate -Format d
+            Add-Content -Path ($drive.DriveLetter + "\BackupTests\Restored.txt") -Value ("`r`n`r`nRestored:  " + $restoredDate)
+        }
+        If (Test-Path ($drive.DriveLetter + "\BackupTests\Restored.txt")) {
+            $restoredFile = Get-Item ($drive.DriveLetter + "\BackupTests\Restored.txt")
+        }
     }
 }
