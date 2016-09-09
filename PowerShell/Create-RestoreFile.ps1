@@ -33,9 +33,18 @@ foreach ($drive in $drives) {
         }
         If (Test-Path ($drive.DriveLetter + "\BackupTests\Restored.txt")) {
             $restoredFile = Get-Item ($drive.DriveLetter + "\BackupTests\Restored.txt")
-            If ($restoredFile.LastWriteTime -gt $today.AddDays(-90)) {
+            If ($restoredFile.LastWriteTime -lt $today.AddDays(-90)) {
                 $driveLetters += $drive.DriveLetter
+                Remove-Item $restoredFile
             }
         }
     }
+}
+
+If ($driveLetters -ne $null) {
+    $smtpServer = "mail.mydomain.com"
+    $from = "myserver@mydomain.com"
+    $to = "helpdeskSystem@mydomain.com"
+    $subject = "Test backups for server: " + $hostname
+    # $body = createBody($driveLetters)
 }
