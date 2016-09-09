@@ -13,7 +13,7 @@
     $hostname = $env:COMPUTERNAME
     $rootFolder = "\BackupTests"
     $fileContainer = "\SourceFile"
-    $fileName = "RestoreMe.txt"
+    $fileName = "\RestoreMe.txt"
     $driveLetters = @()
     $smtpServer = "mail.mydomain.com"
     $from = "myserver@mydomain.com"
@@ -29,6 +29,10 @@ function TimeKeeperFile($driveLetter) {
     (Get-Item -Path ($driveLetter + $rootFolder + "\DoNotDelete")).Attributes = "Hidden","System"
 } #function
 
+function MailBodyBuilder($driveLetterArray) {
+
+} #function
+
 foreach ($drive in $drives) {
     If ($drive.DriveLetter[0] -ne $null) {
         If (!(Test-Path ($drive.DriveLetter + $rootFolder + $fileContainer))) {
@@ -36,14 +40,21 @@ foreach ($drive in $drives) {
             TimeKeeperFile($drive.DriveLetter)
         } #if
 
-        If (Test-Path ($drive.DriveLetter + $rootFolder + $fileContainer + "\" + $fileName)) {
-            Remove-Item ($drive.DriveLetter + $rootFolder + $fileContainer + "\" + $fileName)
-        }
+        If (Test-Path ($drive.DriveLetter + $rootFolder + $fileContainer  + $fileName)) {
+            Remove-Item ($drive.DriveLetter + $rootFolder + $fileContainer  + $fileName)
+        } #if
 
         $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $today
-        New-Item -ItemType File -Path ($drive.DriveLetter + $rootFolder + $fileContainer + "\" + $fileName) -Value $body
+        New-Item -ItemType File -Path ($drive.DriveLetter + $rootFolder + $fileContainer  + $fileName) -Value $body
 
-        If ((Get-Item -Path ($drive.DriveLetter + $rootFolder + "\DoNotDelete")).CreationTime -lt (Get-Date).AddDays(-59)) {
+        If (Test-Path($drive.DriveLetter + $rootFolder + $fileName)) {
+            If (((Get-Item ($drive.DriveLetter + $rootFolder + $fileName)).CreationTime) -lt $today.AddDays(-30)) {
+                Remove-Item -Path ($drive.DriveLetter + $rootFolder + $fileName) -Force
+                TimeKeeperFile($drive.DriveLetter)
+            } #if
+        } #if
+
+        If ((Get-Item -Path ($drive.DriveLetter + $rootFolder + "\DoNotDelete") -Force).CreationTime -lt (Get-Date).AddDays(-59)) {
             $driveLetters += $drive.DriveLetter
         } #if
     } #if
