@@ -41,7 +41,7 @@ function MailBodyBuilder($driveLetterArray) {
     $pre = "Recover the following file(s) from backup: `r`n`r`n"
     $mid = "To the following location(s):  `r`n`r`n"
     $post = "Document success/failure and retain documentation for 1 (one) year."
-    Out-String ($pre + $sources + $mid + $destinations + $post)
+    Write-Output ($pre + $sources + $mid + $destinations + $post) | Out-String
 } #function
 
 foreach ($drive in $drives) {
@@ -66,7 +66,7 @@ foreach ($drive in $drives) {
         } #if
 
         If ((Get-Item -Path ($drive.DriveLetter + $rootFolder + "\DoNotDelete") -Force).CreationTime -lt (Get-Date).AddDays(-59)) {
-            $driveLetters += $drive.DriveLetter | Out-String
+            $driveLetters += $drive.DriveLetter
         } #if
     } #if
 } #foreach
