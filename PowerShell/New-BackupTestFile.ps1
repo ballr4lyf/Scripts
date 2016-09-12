@@ -16,7 +16,7 @@
     $fileName = "\RestoreMe.txt"
     $driveLetters = @()
     $smtpServer = "mail.mydomain.com"
-    $from = "myserver@mydomain.com"
+    $from = "myUserName@mydomain.com"
     $to = "helpdeskSystem@mydomain.com"
     $subject = "Test backups for server: " + $hostname
 ###########################################
@@ -30,7 +30,18 @@ function TimeKeeperFile($driveLetter) {
 } #function
 
 function MailBodyBuilder($driveLetterArray) {
-
+    $sources = ""
+    $destinations = ""
+    foreach ($Letter in $driveLetterArray) {
+        $sources += "    " + $Letter + $rootFolder + $fileContainer + $fileName + "`r`n"
+        $destinations += "    " + $Letter + $rootFolder + $fileName + "`r`n"
+    }
+    $sources += "`r`n"
+    $destinations += "`r`n"
+    $pre = "Recover the following file(s) from backup: `r`n`r`n"
+    $mid = "To the following location(s):  `r`n`r`n"
+    $post = "Document success/failure and retain documentation for 1 (one) year."
+    Out-String ($pre + $sources + $mid + $destinations + $post)
 } #function
 
 foreach ($drive in $drives) {
@@ -55,7 +66,16 @@ foreach ($drive in $drives) {
         } #if
 
         If ((Get-Item -Path ($drive.DriveLetter + $rootFolder + "\DoNotDelete") -Force).CreationTime -lt (Get-Date).AddDays(-59)) {
-            $driveLetters += $drive.DriveLetter
+            $driveLetters += $drive.DriveLetter | Out-String
         } #if
     } #if
 } #foreach
+
+If ($driveLetters -ne $null) {
+    $username = "someUserName"
+    $password = ConvertTo-SecureString -String "someUserPassword" -AsPlainText -Force
+    $creds = New-Object System.Management.Automation.PSCredential($username,$password)
+    $body = MailBodyBuilder($driveLetters)
+
+    Send-MailMessage -SmtpServer $smtpServer -To $to -From $from -Subject $subject -Body $body
+} #if
