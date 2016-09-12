@@ -39,7 +39,7 @@ function MailBodyBuilder($driveLetterArray) {
     $sources += "`r`n"
     $destinations += "`r`n"
     $pre = "Recover the following file(s) from backup: `r`n`r`n"
-    $mid = "To the following location(s):  `r`n`r`n"
+    $mid = "To the following path(s):  `r`n`r`n"
     $post = "Document success/failure and retain documentation for 1 (one) year."
     Write-Output ($pre + $sources + $mid + $destinations + $post) | Out-String
 } #function
