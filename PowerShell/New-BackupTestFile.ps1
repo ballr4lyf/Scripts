@@ -73,9 +73,10 @@ foreach ($drive in $drives) {
 
 If ($driveLetters -ne $null) {
     $username = "someUserName"
-    $password = ConvertTo-SecureString -String "someUserPassword" -AsPlainText -Force
-    $creds = New-Object System.Management.Automation.PSCredential($username,$password)
+    $key = Get-Content "C:\Path\To\AES.key"
+    $messagePWFile = "C:\Path\To\messagePW.txt"
+    $creds = New-Object System.Management.Automation.PSCredential -ArgumentList $username, (Get-Content $messagePWFile | ConvertTo-SecureString -Key $key)
     $body = MailBodyBuilder($driveLetters)
 
-    Send-MailMessage -SmtpServer $smtpServer -To $to -From $from -Subject $subject -Body $body
+    Send-MailMessage -SmtpServer $smtpServer -To $to -From $from -Subject $subject -Body $body -Credential $creds
 } #if
