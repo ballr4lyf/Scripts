@@ -5,6 +5,21 @@
     Purpose:  A evolution of the Create-RestoreFile.ps1 script.
               Performs the same basic job, but also creates Helpdesk
               tickets every ~90 days.
+
+              Note (9/13/16):
+              To create the AES.key file:
+
+                  $keyFile = "C:\Path\To\AES.key"
+                  $key = New-Object Byte[] 32
+                  [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($key)
+                  $key | Out-File $keyFile
+
+              To create messagePW.txt
+
+                  $messagePWFile = "C:\Path\To\messagePW.txt"
+                  $key = Get-Content "C:\Path\To\AES.key"
+                  $password = "MyP@ssw0rd1" | ConvertTo-SecureString -AsPlainText -Force
+                  $password | ConvertFrom-SecureString -key $key | Out-File $messagePWFile
 #>
 
 ############  Global Variables ############
