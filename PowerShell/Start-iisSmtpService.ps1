@@ -9,6 +9,15 @@
 $SMTPService = [adsi]"IIS://localhost/SMTPSVC/1"
 
 If ($SMTPService.ServerState -ne 2) {
+    $LogSource = "IIS SMTP"
+    Try {
+        Get-EventLog -LogName Application -Source $LogSource
+    }
+    Catch {
+        New-EventLog -LogName Application -Source $LogSource
+    }
+
+    Write-EventLog -LogName Application -Source $LogSource -EntryType Warning -EventId 1 -Message "SMTP Service has stopped. Starting Service."
     $SMTPService.ServerState = 2
     $SMTPService.SetInfo()
 }
