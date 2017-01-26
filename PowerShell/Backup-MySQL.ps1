@@ -1,4 +1,4 @@
-﻿<<#
+﻿<#
     Script Name:  Backup-MySQL.ps1
     Created By:  Rob Rathbun
     Created Date:  01/25/2017
