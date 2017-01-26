@@ -73,6 +73,10 @@ foreach ($database in $DbArrayFinal) {
         If (!(Test-Path $database.DbBackupPath)) {
             New-Item $database.DbBackupPath -ItemType Directory | Out-Null; #Create backup folder if it doesn't exist.
         }
+
+        #Retain one week's copies (7days - today = 6).
+        Get-ChildItem $database.DbBackupPath | sort CreationTime -Descending | select -Skip 6 | Remove-Item -Force
+
         $backupDate = (Get-Date -Format yyyy-MM-dd).ToString(); #Backup Date format to be used in file naming.
         $savePath = [string]::Format("{0}\{1}_{2}.sql", $database.DbBackupPath, $database.DbName, $backupDate); #Full savefile name and path.
         
