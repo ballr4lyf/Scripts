@@ -62,4 +62,58 @@ foreach ($namedDB in $DbArrayInit) {
         New-Item $logFileFullPath -ItemType File | Out-Null; #Create a new log file.
     }
 
+Out-File $logFileFullPath -InputObject ([string]::Format("{0} : Starting backup", (Get-Date -Format g))) -Append; #Starting line of log file entry
 
+# Process all databases
+foreach ($database in $DbArrayFinal) {
+    try {
+        Out-File $logFileFullPath -InputObject ([string]::Format("`tBacking up database name `"{0}`".", $database.DbName)) -Append;
+        If (!(Test-Path $database.DbBackupPath)) {
+            New-Item $database.DbBackupPath -ItemType Directory | Out-Null; #Create backup folder if it doesn't exist.
+        }
+        $backupDate = (Get-Date -Format yyyy-MM-dd).ToString(); #Backup Date format to be used in file naming.
+        $savePath = [string]::Format("{0}\{1}_{2}.sql", $database.DbBackupPath, $database.DbName, $backupDate); #Full savefile name and path.
+        
+        $command = [string]::Format("`"{0}`" -u {1} -p {2} -h {3} --quick --default-character-set=utf8 --routines --events `"{4}`" > `"{5}`"",
+            $mySQLDumpLocation,
+            $dbUser,
+            $dbPassword,
+            $serverIP,
+            $database.DbName,
+            $savePath
+        ); #Formated string of mysqldump.exe command to be run.
+
+        $dumpError;
+        Invoke-Expression "& $command" -ErrorVariable dumpError; #Execute backup command.
+
+        # Log backup job completion.
+        If ($dumpError -eq $null) {
+            Out-File $logFileFullPath -InputObject ([string]::Format("`tBackup of database `"{0}`" completed with no error codes", $database.DbName)) -Append;
+        } Else {
+            Out-File $logFileFullPath -InputObject ([string]::Format("`tBackup of database `"{0}`" completed with error: `"{1}`"", $database.DbName, $dumpError)) -Append;
+        }
+
+        #Add backup to *.7z compressed archive.
+        $7zFileFullPath = [string]::Format("{0}\{1}_{2}.7z", $database.DbBackupPath, $database.DbName, $backupDate);
+        $7zCommand = [string]::Format("`"{0}`" a -t7z `"{1}`" -i!`"{2}`"", $7zipPath, $7zFileFullPath, $savePath);
+        $compressError;
+        Invoke-Expression "& $7zCommand" -ErrorVariable compressError | Out-Null;
+
+        # Log compression results.  Delete *.sql file if no errors.
+        If ($compressError -eq $null) {
+            Out-File $logFileFullPath -InputObject ([string]::Format("`tFile `"{0}`" compressed into file `"{1}`".", $savePath, $7zFileFullPath)) -Append;
+            Remove-Item $savePath -Force;
+            Out-File $logFileFullPath -InputObject ([string]::Format("`tFile `"{0}`" deleted.", $savePath)) -Append;
+        } Else {
+            Out-File $logFileFullPath -InputObject "`tCompression failed with error code: $compressError" -Append;
+            If (Test-Path $7zFileFullPath) {Remove-Item $7zFileFullPath -Force;}
+        }
+    }
+    Catch [Exception] {
+        #Write exception to log file.
+        $logEntry = [string]::Format("`tFailed to start backup of database name `"{0}`". Reason: {1}", $database.DbName, $_.Exception.Message);
+        Out-File $logFileFullPath -InputObject $logEntry -Append;
+    }
+}
+
+Out-File $logFileFullPath -InputObject ([string]::Format("{0} : Backup Completed", (Get-Date -Format g))) -Append;
