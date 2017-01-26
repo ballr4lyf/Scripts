@@ -6,6 +6,8 @@
 
     Inspired by the following script:
         http://www.fluxbytes.com/powershell/using-powershell-to-backup-your-mysql-databases/
+
+    Make sure to change the variables on lines 24-43 to match your environment.
 #>
 Class DB {
     [string] $DbName;
