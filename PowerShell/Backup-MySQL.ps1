@@ -57,9 +57,9 @@ foreach ($namedDB in $DbArrayInit) {
     } Elseif ((Get-Item $logFileFullPath).Length -gt 50mb) {
         If (Test-Path ($logFileFullPath + ".old")) {
             Remove-Item ($logFileFullPath + ".old") -Force | Out-Null; #Check for and remove old backup logfile over 50mb.
+            Rename-Item -Path $logFileFullPath -NewName ($logFile + ".old") | Out-Null; #Rename existing logfile.
+            New-Item $logFileFullPath -ItemType File | Out-Null; #Create a new log file.
         }
-        Rename-Item -Path $logFileFullPath -NewName ($logFile + ".old") | Out-Null; #Rename existing logfile.
-        New-Item $logFileFullPath -ItemType File | Out-Null; #Create a new log file.
     }
 
 Out-File $logFileFullPath -InputObject ([string]::Format("{0} : Starting backup", (Get-Date -Format g))) -Append; #Starting line of log file entry
@@ -101,7 +101,7 @@ foreach ($database in $DbArrayFinal) {
 
         # Log compression results.  Delete *.sql file if no errors.
         If ($compressError -eq $null) {
-            Out-File $logFileFullPath -InputObject ([string]::Format("`tFile `"{0}`" compressed into file `"{1}`".", $savePath, $7zFileFullPath)) -Append;
+            Out-File $logFileFullPath -InputObject ([string]::Format("`tFile `"{0}`" compressed into archive `"{1}`".", $savePath, $7zFileFullPath)) -Append;
             Remove-Item $savePath -Force;
             Out-File $logFileFullPath -InputObject ([string]::Format("`tFile `"{0}`" deleted.", $savePath)) -Append;
         } Else {
