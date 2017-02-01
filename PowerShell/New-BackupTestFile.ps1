@@ -73,13 +73,25 @@ foreach ($drive in $drives) {
         $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $today
         New-Item -ItemType File -Path ($drive.DriveLetter + $rootFolder + $fileContainer  + $fileName) -Value $body
 
-        # This section is not fool-proof.  E.G. it only works if the restored file is older than 30 days.
+        # Check if the file has been restored.
         If (Test-Path($drive.DriveLetter + $rootFolder + $fileName)) {
-            If (((Get-Item ($drive.DriveLetter + $rootFolder + $fileName)).CreationTime) -lt $today.AddDays(-30)) {
-                Remove-Item -Path ($drive.DriveLetter + $rootFolder + $fileName) -Force
+
+            # NOTE: because this script is scheduled to run daily, I'm using a margin of error of 2 days, to allow for unforseen interuptions during script runtime.
+
+            # If the "LastAccessTime" of the recovered file is less than (today - 2), set it to (today + 30).
+            If ((Get-Item ($drive.DriveLetter + $rootFolder + $fileName).LastAccessTime) -lt $today.AddDays(-2)) {
+                Set-ItemProperty -Path ($drive.DriveLetter + $rootFolder + $fileName) -Name LastAccesstime -Value ($today.AddDays(30))
+            }
+
+            # If the "LastAccessTime" of restored file is greater than today, AND less than (today + 2),
+            # delete it and create new "TimeKeeperFile".
+            If ((Get-Item ($drive.DriveLetter + $rootFolder + $fileName).LastAccessTime) -gt $today -and 
+            (Get-Item ($drive.DriveLetter + $rootFolder + $fileName).LastAccessTime) -lt $today.AddDays(2)) {
+                Remove-Item ($drive.DriveLetter + $rootFolder + $fileName) -Force
                 TimeKeeperFile($drive.DriveLetter)
-            } #if
-        } #if
+            }
+
+        }
 
         If ((Get-Item -Path ($drive.DriveLetter + $rootFolder + "\DoNotDelete") -Force).CreationTime -lt (Get-Date).AddDays(-59)) {
             $driveLetters += $drive.DriveLetter
