@@ -73,6 +73,7 @@ foreach ($drive in $drives) {
         $body = "Computer Name:  " + $hostname + "`r`nDrive Letter:  " + $drive.DriveLetter + "`r`nFile Creation Date:  " + $today
         New-Item -ItemType File -Path ($drive.DriveLetter + $rootFolder + $fileContainer  + $fileName) -Value $body
 
+        # This section is not fool-proof.  E.G. it only works if the restored file is older than 30 days.
         If (Test-Path($drive.DriveLetter + $rootFolder + $fileName)) {
             If (((Get-Item ($drive.DriveLetter + $rootFolder + $fileName)).CreationTime) -lt $today.AddDays(-30)) {
                 Remove-Item -Path ($drive.DriveLetter + $rootFolder + $fileName) -Force
