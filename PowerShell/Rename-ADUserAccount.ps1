@@ -48,6 +48,7 @@ function Rename-ADUserAccount
         {
             $fnLenght = 12
         }
+        Import-Module ActiveDirectory
     }
     Process
     {
