@@ -83,7 +83,10 @@ function Rename-ADUserAccount
                 If ($shortName -notlike $user.SamAccountName)
                 {
                     Rename-Item $user.HomeDirectory -NewName $shortName
-                    Set-ADUser $user -SamAccountName $shortName -UserPrincipalName ($shortName + "@" + ($domain.DNSRoot)) -HomeDirectory ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)
+                    $arguments = @{SamAccountName = $shortName; 
+                                   UserPrincipalName = ($shortName + "@" + ($domain.DNSRoot)); 
+                                   HomeDirectory = ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)}
+                    Set-ADUser $user @arguments
                 }
                 Else
                 {
