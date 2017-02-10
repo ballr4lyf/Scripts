@@ -57,41 +57,38 @@ function Rename-ADUserAccount
         {
             try 
             {
-                $user = Get-ADUser $entry -SearchBase $searchBase -Properties HomeDirectory -ErrorAction Stop
+                $user = Get-ADUser $entry -SearchBase $searchBase -Properties HomeDirectory -ErrorAction SilentlyContinue
             }
             catch 
             {
-                Write-Warning "Unable to get user `"" + $entry + "`". " + $($_.Exception.Message)
+                Write-Warning ("Unable to get user `"" + $entry + "`". " + $($_.Exception.Message))
             }
             If ($user -ne $null) 
             {
-                If ($fnLenght -eq 1) 
+                $shortFirst = $user.GivenName[0..($fnLenght - 1)] -join ""
+                If ($fnLenght -ne 1)
                 {
-                    $shortFirst = $user.GivenName[0]
-
+                    $shortFirst += "."
                 }
-                Else
-                {
-                    $shortFirst = If (($user.GivenName).Length -gt 12)
-                        {
-                            ($user.GivenName[0..12] -join "") + "."
-                        }
-                        Else
-                        {
-                            $user.GivenName + "."
-                        }
-                }
-                $shortLast = If (($user.Surname).Length -gt 12)
+                $shortLast = If (($user.Surname).Length -gt $fnLenght)
                     {
-                        $user.Surname[0..12] -join ""
+                        $user.Surname[0..($fnLenght - 1)] -join ""
                     }
                     Else
                     {
                         $user.Surname
                     }
                 $shortName = $shortFirst + $shortLast
-                Rename-Item $user.HomeDirectory -NewName $shortName
-                Set-ADUser $user -SamAccountName $shortName -UserPrincipalName ($shortName + "@" + ($domain.DNSRoot)) -HomeDirectory ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)
+
+                If ($shortName -notlike $user.SamAccountName)
+                {
+                    Rename-Item $user.HomeDirectory -NewName $shortName
+                    Set-ADUser $user -SamAccountName $shortName -UserPrincipalName ($shortName + "@" + ($domain.DNSRoot)) -HomeDirectory ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)
+                }
+                Else
+                {
+                    Write-Warning "No changes made. Username already set correctly."
+                }
             }
         }
     }
