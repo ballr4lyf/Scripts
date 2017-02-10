@@ -42,11 +42,11 @@ function Rename-ADUserAccount
     {
         If ($format -like "short") 
         {
-            $fnLenght = 1
+            $nameLength = 1
         } 
         Else 
         {
-            $fnLenght = 12
+            $nameLength = 12
         }
         Import-Module ActiveDirectory
     }
@@ -65,14 +65,14 @@ function Rename-ADUserAccount
             }
             If ($user -ne $null) 
             {
-                $shortFirst = $user.GivenName[0..($fnLenght - 1)] -join ""
-                If ($fnLenght -ne 1)
+                $shortFirst = $user.GivenName[0..($nameLength - 1)] -join ""
+                If ($nameLength -ne 1)
                 {
                     $shortFirst += "."
                 }
-                $shortLast = If (($user.Surname).Length -gt $fnLenght)
+                $shortLast = If (($user.Surname).Length -gt $nameLength)
                     {
-                        $user.Surname[0..($fnLenght - 1)] -join ""
+                        $user.Surname[0..($nameLength - 1)] -join ""
                     }
                     Else
                     {
