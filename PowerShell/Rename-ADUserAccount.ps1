@@ -12,7 +12,7 @@
 
    Renames useraccount "john.doe" to "jdoe".
 .EXAMPLE
-   Rename-ADUserAccount -searchBase "CN=Org Users,DC=domain,DC=com" -format Short
+   Rename-ADUserAccount -searchBase "OU=Org Users,DC=domain,DC=com" -format Short
 
    Rename all user accounts found under the "Org Users" OU using the <FirstInitial><LastName> format.
 .EXAMPLE
@@ -114,11 +114,20 @@ function Rename-ADUserAccount
 
                     If ($shortName -notlike $user.SamAccountName) # Check to make sure the username is not already defined correctly.
                     {
-                        Rename-Item $user.HomeDirectory -NewName $shortName  # Rename the HomeDirectory folder.
+                        If ($user.HomeDirectory -ne $null) # Check to make sure the HomeDirectory property is not <blank> then rename the HomeDirectory folder.
+                        {
+                            Rename-Item $user.HomeDirectory -NewName $shortName  
+                            $arguments = @{SamAccountName = $shortName; 
+                                           UserPrincipalName = ($shortName + "@" + ($domain.DNSRoot)); 
+                                           HomeDirectory = ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)}
+                        }
+                        Else # no HomeDirectory defined for user account.
+                        {
+                            $arguments = @{SamAccountName = $shortName; 
+                                           UserPrincipalName = ($shortName + "@" + ($domain.DNSRoot))}
+                        }
                         # Define arguments to be used in setting the username(s).
-                        $arguments = @{SamAccountName = $shortName; 
-                                       UserPrincipalName = ($shortName + "@" + ($domain.DNSRoot)); 
-                                       HomeDirectory = ($user.HomeDirectory).Replace($user.SamAccountName, $shortName)}
+                        
                         Set-ADUser $user @arguments # Set username(s) to the generated username.
                     }
                     Else
