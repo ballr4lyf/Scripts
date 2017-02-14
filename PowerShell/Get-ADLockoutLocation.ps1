@@ -3,6 +3,10 @@
    Get Lockout information for specified user account.
 .DESCRIPTION
    Retrieves lockout information for the referenced locked out domain account.
+
+   Note: The domain controller MUST be configured to "Audit Account Lockout" successes and failures.
+         This can be found in Group Policies under the [Computer Configuration\Windows Settings\Security
+         Settings\Local Policies\Audit Policy\Audit account management] policy.
 .EXAMPLE
    Get-ADLockoutLocation -UserName jdoe
 
