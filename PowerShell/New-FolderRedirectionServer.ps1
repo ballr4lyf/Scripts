@@ -11,10 +11,13 @@
 $oldServer = "oldServerName"
 $newServer = "newServerName"
 
-function replace($key) {
-    foreach ($property in (Get-ItemProperty -Path $key.PSPath)) {
-        If ($property.toString() -like "\\$oldServer\*") {
-            Set-ItemProperty -Path $key.PSPath -Name $property.Name -Value ($property.ToString()).replace($oldServer, $newServer)
+function replaceServer($key) {
+    $properties = (Get-ItemProperty -Path $key.PSPath)
+    $a = $properties | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
+    foreach ($propertyName in $a) {
+        If ($properties.$propertyName.ToString() -like "\\$oldServer*") {
+            $newValue = $properties.$propertyName.ToString() -replace $oldServer, $newServer
+            Set-ItemProperty -Path $key.PSPath -Name $propertyName -Value $newValue
         }
     }
 }
@@ -22,6 +25,8 @@ function replace($key) {
 $shellFolders =Get-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders"
 $userShellFolders = Get-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
 
+replaceServer($shellFolders)
+replaceServer($userShellFolders)
 
-# $profileFolders = @("Administrative Tools", "Desktop", "Favorites", "Personal", "Programs", "Start Menu", "Startup")
-
+Stop-Process -Name explorer
+Start-Process -FilePath C:\Windows\explorer.exe
