@@ -10,14 +10,13 @@ import time
 switchIP = '192.168.1.2'
 username = 'backup_user'
 password = 'backupUserPassw0rd'
-destination = '\my\backup\destination'
+destination = '/my/backup/destination'
 
 # Create SSH client
 ssh = paramiko.SSHClient()
 
 # Automatically add untrusted SSH hosts.
-ssh.set_missing_host_key_policy(
-    paramiko.AutoAddPolicy())
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # Connect to switch
 ssh.Connect(switchIP, username=username, password=password, look_for_keys=False, allow_agent=False)
@@ -48,7 +47,7 @@ output = connection.recv(65535)
 saveoutput = open(destination + '/switch_' + switchIP + '.config', w)
 saveoutput.write(output)
 saveoutput.write('\n')
-    saveoutput.close
+saveoutput.close
 
 # Reset paging.
 connection.send('system-view\n')
