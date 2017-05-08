@@ -33,7 +33,7 @@ connection.send('512900\n')
 # Disable paging.
 connection.send('system-view\n')
 connection.send('user-interface vty 0 15\n')
-connection.send('screen-lenght 0\n')
+connection.send('screen-length 0\n')
 connection.send('quit\n')
 connection.send('quit\n')
 
@@ -46,6 +46,6 @@ time.sleep(2)
 # Reset paging.
 connection.send('system-view\n')
 connection.send('user-interface vty 0 15\n')
-connection.send('screen-lenght 24\n')
+connection.send('screen-length 24\n')
 connection.send('quit\n')
 connection.send('quit\n')
