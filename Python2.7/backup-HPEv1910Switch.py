@@ -10,6 +10,7 @@ import time
 switchIP = '192.168.1.2'
 username = 'backup_user'
 password = 'backupUserPassw0rd'
+destination = '\my\backup\destination\file.config'
 
 # Create SSH client
 ssh = paramiko.SSHClient()
@@ -23,3 +24,28 @@ ssh.Connect(switchIP, username=username, password=password, look_for_keys=False,
 
 # Initiate interactive session with switch.
 connection = ssh.invoke_shell()
+
+# Enable advanced shell.
+connection.send('_cmdline-mode on\n')
+connection.send('Y\n')
+connection.send('512900\n')
+
+# Disable paging.
+connection.send('system-view\n')
+connection.send('user-interface vty 0 15\n')
+connection.send('screen-lenght 0\n')
+connection.send('quit\n')
+connection.send('quit\n')
+
+# Show current config.
+connection.send('display current-configuration\n')
+
+# Wait to complete.
+time.sleep(2)
+
+# Reset paging.
+connection.send('system-view\n')
+connection.send('user-interface vty 0 15\n')
+connection.send('screen-lenght 24\n')
+connection.send('quit\n')
+connection.send('quit\n')
