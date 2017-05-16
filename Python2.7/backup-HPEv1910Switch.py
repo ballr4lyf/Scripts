@@ -42,12 +42,17 @@ connection.send('display current-configuration\n')
 # Wait to complete.
 time.sleep(2)
 
-# Save output to file.
+# Save output to temporary file.
 output = connection.recv(65535)
-saveoutput = open(destination + '/switch_' + switchIP + '.config', w)
-saveoutput.write(output)
-saveoutput.write('\n')
-saveoutput.close
+outfile = open(destination + '/switch_' + switchIP + '.config', w)
+outfile.write(output)
+outfile.write('\n')
+outfile.close
+
+# Prune extra lines from config.
+lines = outfile.readlines()
+outfile = outfile.writelines(lines[36:-1]) # By default, the config starts at line 36.
+outfile.close()
 
 # Reset paging.
 connection.send('system-view\n')
