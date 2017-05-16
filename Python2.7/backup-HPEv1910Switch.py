@@ -19,7 +19,7 @@ ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # Connect to switch
-ssh.Connect(switchIP, username=username, password=password, look_for_keys=False, allow_agent=False)
+ssh.connect(switchIP, username=username, password=password, look_for_keys=False, allow_agent=False)
 
 # Initiate interactive session with switch.
 connection = ssh.invoke_shell()
@@ -44,15 +44,16 @@ time.sleep(2)
 
 # Save output to temporary file.
 output = connection.recv(65535)
-outfile = open(destination + '/switch_' + switchIP + '.config', w)
-outfile.write(output)
-outfile.write('\n')
-outfile.close
+tempfile = open(destination + '/switch_' + switchIP + '.config', 'w')
+tempfile.write(output)
+tempfile.write('\n')
+tempfile.close
 
 # Prune extra lines from config.
-lines = outfile.readlines()
-outfile = outfile.writelines(lines[36:-1]) # By default, the config starts at line 36.
-outfile.close()
+lines = open(destination + '/switch_' + switchIP + '.config', 'r').readlines()
+outfile = open(destination + '/switch_' + switchIP + '.config', 'w')
+outfile.writelines(lines[18:-1])    # By default, the config starts at line 18.
+outfile.close
 
 # Reset paging.
 connection.send('system-view\n')
