@@ -5,12 +5,12 @@
     Purpose:  Simple script to fix issues with ShadowSnap services for Datto agents.
 #>
 
-$services = @("vsnapvss", "ShadowProtectSvc", "raw_agent_svc")
+$services = @("vsnapvss", "ShadowProtectSvc", "stc_raw_agent")
 
 foreach ($service in $services) {
     Stop-Service -Name $service
-    If (Get-Process -Name $service) {
-        Stop-Service -Name $service -Force
+    If (Get-Process -Name $service -ErrorAction SilentlyContinue) {
+        Stop-Process -Name $service -Force
     }
     Start-Service -Name $service
 }
