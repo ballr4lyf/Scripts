@@ -9,9 +9,9 @@
     2.  The PC/Server will still need to be rebooted after install.
 #>
 
-$URL = "http://downloads.dattobackup.com/ShadowSnap/DattoWindowsAgent51.exe"
+$URL = "https://www.datto.com/downloads/DattoWindowsAgent.exe"
 $installDir = "C:\Kits"
-$installer = $installDir + "\DattoWindowsAgent51.exe"
+$installer = $installDir + "\DattoWindowsAgent.exe"
 
 
 # Check PowerShell version is greater than or equal to 3.
