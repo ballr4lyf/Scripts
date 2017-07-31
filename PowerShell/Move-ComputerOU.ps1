@@ -8,7 +8,7 @@
 $searchBase = "CN=Computers,DC=domain,DC=local"
 $laptopsOU = "OU=Laptops," + $searchBase
 $desktopsOU = "OU=Desktops," + $searchBase
-$computers = Get-ADComputer -Filter * -SearchBase $searchBase | ?{($_.DistinguishedName -notlike $laptopsOU) -and ($_.DistinguishedName -notlike $desktopsOU)}
+$computers = Get-ADComputer -Filter * -SearchBase $searchBase | Where-Object {($_.DistinguishedName -notlike $laptopsOU) -and ($_.DistinguishedName -notlike $desktopsOU)}
 
 If ($computers -ne $null) {
     foreach ($computer in $computers) {
