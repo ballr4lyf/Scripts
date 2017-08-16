@@ -20,5 +20,4 @@ def to_doc_a(file_name, variable):
     with open(file_name, 'a') as f:
         f.write(variable)
         f.write('n')
-        f.close()
 
