@@ -3,13 +3,14 @@
 # Created by:  Rob Rathbun
 # Date Create:  May 8, 2017
 
+from getpass import getpass
 import paramiko
 import time
 
 # Update these variables to match your environment:
 switchIP = '192.168.1.2'
-username = 'backup_user'
-password = 'backupUserPassw0rd'
+username = raw_input('Username: ')
+password = getpass()
 destination = '/my/backup/destination'
 
 # Create SSH client
