@@ -9,13 +9,18 @@
 
 Import-Module ActiveDirectory
 
-$myTable = Import-Csv -Path "C:\Path\to\File.csv"
-$ADoHashTable = @{}
+$content = Import-Csv -Path "C:\Path\To\File.csv"
+$objectArray = @()
 
-ForEach-Object ($r in $myTable) {
-    $ADoHashTable[$r.Source] = $r.DestinationOU
+foreach ($item in $content) {
+    $itemDetails = [System.Management.Automation.PSCustomObject]@{
+        Source = $item.Source
+        Destination = $item.DestinationOU
+    }
+
+    $objectArray += $itemDetails
 }
 
-ForEach-Object ($ADobject in $ADoHashTable) {
-    Move-ADObject -Identity $ADobject.Source -TargetPath $ADobject.DestinationOU
+ForEach-Object ($ADobject in $objectArray) {
+    Move-ADObject -Identity $ADobject.Source -TargetPath $ADobject.Destination
 }
