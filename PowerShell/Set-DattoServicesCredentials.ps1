@@ -1,10 +1,10 @@
 Import-Module ActiveDirectory
 
-$Domain = (Get-ADDomain).Name
-$Username = "DattoAgent"
+
+$Username = Get-ADUser -Identity "DattoAgent" -Erroraction SilentlyContinue
 $PW = "1qa2wsfr43ed!Q#EF$"
 
-If (!(Get-ADUser -Identity $Username)) {
+If ($Username -eq $null) {
     New-ADUser -DisplayName "Datto Agent" -SamAccountName $Username -AccountPassword (ConvertTo-SecureString -AsPlainText $PW -Force)
     Add-ADGroupMember -Identity "PC Admins" -Member "$Domain\$Username"
 }
