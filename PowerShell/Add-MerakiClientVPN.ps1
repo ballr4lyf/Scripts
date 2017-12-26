@@ -2,13 +2,13 @@
     ScriptName:  Add-MerakiClientVPN.ps1
     Created By:  Robert Rathbun
     Created Date:  12/26/2017
-    Purpose:  Deploy Meraki Client VPN.  Requires Powershell Version 5.
+    Purpose:  Deploy Meraki Client VPN.  Requires Windows 8.1 or above.
 #>
 
 
-$VPNName = 
-$VPNServer = 
-$PSK = 
+$VPNName = ""
+$VPNServer = ""
+$PSK = ""
 
 Add-VpnConnection -Name $VPNName `
                   -ServerAddress $VPNServer `
