@@ -52,7 +52,7 @@ function Invoke-DellDriverUpdates
 
         If (!(Test-Path "$DownloadDir\$DownloadFile")) {
             Write-Debug "Cleaning/Removing all `"*.exe`" files from `"C:\Temp\DCU`"."
-            Remove-Item "$DownloadDir\*.exe" -Force
+            Remove-Item "$DownloadDir\*.exe" -Force -ErrorAction SilentlyContinue
 
             Write-Debug "Installer not downloaded. Downloading."
             $download = {Invoke-WebRequest -Uri $args[0] -OutFile $args[1] -TimeoutSec 600}
