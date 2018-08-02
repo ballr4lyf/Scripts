@@ -56,8 +56,8 @@ function Invoke-DellDriverUpdates
 
             Write-Debug "Installer not downloaded. Downloading."
             $download = {Invoke-WebRequest -Uri $args[0] -OutFile $args[1] -TimeoutSec 600}
-            Start-Job -Name Webreq -ScriptBlock $download -ArgumentList $DownloadURL,"$DownloadDir\$DownloadFile"
-            Wait-Job -Name Webreq
+            Start-Job -Name Webreq -ScriptBlock $download -ArgumentList $DownloadURL,"$DownloadDir\$DownloadFile" | Out-Null
+            Wait-Job -Name Webreq | Out-Null
         }
 
         try {
