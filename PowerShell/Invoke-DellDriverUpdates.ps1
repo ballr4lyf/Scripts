@@ -80,7 +80,7 @@ function Invoke-DellDriverUpdates
         
         try {
             Write-Debug "Silently installing Dell Command Update."
-            Start-Process -FilePath $($ExtractedFile.FullName) -ArgumentList "/S /v /qn" -Wait
+            Start-Process -FilePath $($ExtractedFile.FullName) -ArgumentList "/S /v`"/qn`"" -Wait
         }
         catch {
             Write-Output "Unable to install Dell Command Update. Exiting Script."
@@ -88,7 +88,7 @@ function Invoke-DellDriverUpdates
         }
 
         Write-Debug "Installation complete. Removing executables from `"C:\Temp\DCU`" folder."
-        Remove-Item "$DownloadDir\*.exe" -Force
+        Remove-Item "$DownloadDir\*.exe" -Force -ErrorAction SilentlyContinue
         }
     }
     Process
