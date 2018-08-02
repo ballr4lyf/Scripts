@@ -91,7 +91,10 @@ function Invoke-DellDriverUpdates
     }
     Process
     {
-        If (!(Test-Path ))
+        If (!(Test-Path "$InstallLocation\$DCU")) {
+            Write-Debug "Product not installed. Exiting script."
+            Exit
+        }
 
         Write-Debug "Setting argument list for `"Dell Command Update`" commands."
         $ArgList = "/silent"
