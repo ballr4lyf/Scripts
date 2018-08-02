@@ -71,7 +71,7 @@ function Invoke-DellDriverUpdates
         
 
         try {
-            $ExtractedFile = Get-ChildItem $DownloadDir | Where-Object{($_.Name -like "*.exe") -and ($_.Name -ne $DownloadFile -or $_.Name -ne "setup.exe")}
+            $ExtractedFile = Get-ChildItem $DownloadDir | Where-Object{$_.Name -like "DCU*.exe"}
         }
         catch {
             Write-Output "Installer file not located. Exiting script."
