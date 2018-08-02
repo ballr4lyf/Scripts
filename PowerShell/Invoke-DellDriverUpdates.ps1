@@ -55,7 +55,9 @@ function Invoke-DellDriverUpdates
             Remove-Item "$DownloadDir\*.exe" -Force
 
             Write-Debug "Installer not downloaded. Downloading."
-            Invoke-WebRequest -Uri $DownloadURL -OutFile "$DownloadDir\$DownloadFile" -TimeoutSec 600
+            $download = {Invoke-WebRequest -Uri $args[0] -OutFile $args[1] -TimeoutSec 600}
+            Start-Job -Name Webreq -ScriptBlock $download -ArgumentList $DownloadURL,"$DownloadDir\$DownloadFile"
+            Wait-Job -Name Webreq
         }
 
         try {
@@ -63,13 +65,13 @@ function Invoke-DellDriverUpdates
             Start-Process -FilePath "$DownloadDir\$DownloadFile" -ArgumentList "/s /e=$DownloadDir" -Wait
         }
         catch {
-            Write-Output "Unable to extract DCU installer from downloaded file. Exiting script."
+            Write-Debug "Unable to extract DCU installer from downloaded file. Exiting script."
             Exit
         }
         
 
         try {
-            $ExtractedFile = Get-ChildItem $DownloadDir | Where-Object{($_.Name -like "*.exe") -and {$_.Name -ne $DownloadFile}}
+            $ExtractedFile = Get-ChildItem $DownloadDir | Where-Object{($_.Name -like "*.exe") -and ($_.Name -ne $DownloadFile -or $_.Name -ne "setup.exe")}
         }
         catch {
             Write-Output "Installer file not located. Exiting script."
