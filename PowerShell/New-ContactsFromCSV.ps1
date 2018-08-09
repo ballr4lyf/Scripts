@@ -29,7 +29,7 @@ function New-ContactsFromCSV
         [string]$CSV,
 
         # Distinguished Name of the target Organizational Unit in AD.
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$false)]
         [string]
         $DestinationOU
     )
