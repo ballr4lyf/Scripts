@@ -18,7 +18,7 @@
 function New-ContactsFromCSV
 {
     [CmdletBinding()]
-    [Alias()]
+    # [Alias()]
     [OutputType([int])]
     Param
     (
@@ -26,7 +26,7 @@ function New-ContactsFromCSV
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        $CSV,
+        [string]$CSV,
 
         # Distinguished Name of the target Organizational Unit in AD.
         [Parameter(Mandatory=$true)]
@@ -38,7 +38,7 @@ function New-ContactsFromCSV
     {
         Import-Module ActiveDirectory
 
-        If ([adsi]::Exists("LDAP://$OU")) {
+        If ([adsi]::Exists("LDAP://$($OU)")) {
             If (!(Test-Path $CSV)) {
             Write-Output "Path to CSV file is invalid."
             Exit
@@ -55,17 +55,19 @@ function New-ContactsFromCSV
             If (($contact.MiddleInitial -eq $null) -or ($contact.MiddleInitial -eq " ") -or ($contact.MiddleInitial -eq "")) {
                 $MiddleInitial = ""
             } else {
-                $MiddleInitial = $contact.MiddleInitial
+                $MiddleInitial = (Get-Culture).TextInfo.ToTitleCase($contact.MiddleInitial)
             }
-            $Name = "$($contact.FirstName) $($contact.LastName)"
-            $DisplayName = "$($contact.FirstName) $($contact.LastName) (External Contact)"
-            $contactAlias = "$($contact.FirstName).$($contact.LastName)"
+            $FirstName = (Get-Culture).TextInfo.ToTitleCase($contact.Firstname)
+            $LastName = (Get-Culture).TextInfo.ToTitleCase($contact.LastName)
+            $Name = $FirstName + " " + $LastName
+            $DisplayName = $Name + " (External Contact)"
+            $contactAlias = "$($FirstName).$($LastName)"
 
-            If ((Get-Recipient -Identity $contact.EmailAddress) -eq $null) {
+            If ((Get-Recipient -Identity $contact.EmailAddress -ErrorAction SilentlyContinue) -eq $null) {
                 New-MailContact -OrganizationalUnit $OU `
-                                -FirstName $contact.FirstName `
+                                -FirstName $FirstName `
                                 -Initials $MiddleInitial `
-                                -LastName $contact.LastName `
+                                -LastName $LastName `
                                 -Name $Name `
                                 -Alias $contactAlias `
                                 -DisplayName $DisplayName `
