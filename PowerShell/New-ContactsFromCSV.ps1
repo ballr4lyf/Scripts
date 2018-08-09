@@ -15,7 +15,7 @@
 .EXAMPLE
    New-ContactsFromCSV -CSV C:\My\Csv\File.csv -DestinationOU "OU=My Org Unit,DC=contoso,DC=com"
 #>
-function Verb-Noun
+function New-ContactsFromCSV
 {
     [CmdletBinding()]
     [Alias()]
@@ -40,12 +40,12 @@ function Verb-Noun
 
         If ([adsi]::Exists("LDAP://$OU")) {
             If (!(Test-Path $CSV)) {
-            Write-Error "Path to CSV file is invalid."
+            Write-Output "Path to CSV file is invalid."
             Exit
             }
             $Contacts = Import-Csv $CSV
         } else {
-            Write-Error "Organizational Unit does not Exist. Please create or change the Destination OU."
+            Write-Output "Organizational Unit does not Exist. Please create or change the Destination OU."
             Exit
         }
     }
@@ -61,7 +61,7 @@ function Verb-Noun
             $DisplayName = "$($contact.FirstName) $($contact.LastName) (External Contact)"
             $contactAlias = "$($contact.FirstName).$($contact.LastName)"
 
-            If ((Get-Recipient -Identity $contact.EmailAddress) -ne $null) {
+            If ((Get-Recipient -Identity $contact.EmailAddress) -eq $null) {
                 New-MailContact -OrganizationalUnit $OU `
                                 -FirstName $contact.FirstName `
                                 -Initials $MiddleInitial `
@@ -72,7 +72,7 @@ function Verb-Noun
                                 -ExternalEmailAddress $contact.EmailAddress `
                                 -PrimarySMTPAddress $contact.EmailAddress
             } Else {
-                Write-Output "Contact not created for `"$($contact.Firstname) $($contact.LastName)`". Please create the contact manually."
+                Write-Output "Contact not created for `"$($contact.Firstname) $($contact.LastName)`". Email address already exists."
             }
         } 
     }
