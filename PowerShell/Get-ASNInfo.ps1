@@ -1,17 +1,58 @@
 <#
-Obtain ASN info of Ip address
-Invoke-RestMethod -Method Get -Uri https://api.iptoasn.com/v1/as/ip/<ip Address>
-Returns JSON data.
+.Synopsis
+   Obtain information on ASN of public IP address.
 
-Example Return:
-{
-  "announced": true,
-  "as_country_code": "US",
-  "as_description": "LEVEL3 - Level 3 Communications, Inc.",
-  "as_number": 3356,
-  "first_ip": "4.0.0.0",
-  "last_ip": "4.23.87.255"
-}
+   Author:  Robert Rathbun
+.DESCRIPTION
+   Obtain information on ASN of public IP address.  
+   
+.EXAMPLE
+   Get-ASNInfo -IPAddress 8.8.8.8
 
-First use "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12" to set Invoke-RestMethod to use TLS 1.2.
+    announced       : True
+    as_country_code : US
+    as_description  : GOOGLE - Google LLC
+    as_number       : 15169
+    first_ip        : 8.8.8.0
+    ip              : 8.8.8.8
+    last_ip         : 8.8.8.255   
 #>
+function Get-ASNInfo
+{
+    [CmdletBinding()]
+    [Alias()]
+    Param
+    (
+        # Short or Long format of new username. Short format is <FirstInitial><LastName>.  Long format is <FirstName>.<LastName>.
+        [Parameter(Mandatory=$true)]
+        [string]$IPAddress
+    )
+
+    Begin
+    {
+      $IPRegex = [regex] "\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b"
+      if (!($IPRegex.Match($IPAddress)).Success) {
+        throw "Invalid input. Address provided is not a valid IP address."
+      }
+      else {
+        Write-Debug "IP Address Confirmed."
+      }
+    }
+    Process
+    {
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      $uri = "https://api.iptoasn.com/v1/as/ip/"
+      $uri += $IPAddress
+
+      Write-Debug "Complete URI is $($uri)"
+
+      $Results = Invoke-RestMethod -Method Get -Uri $uri -ErrorVariable RestError
+      If ($RestError -ne $null) {
+        return $RestError
+      }
+    }
+    End
+    {
+      return $Results
+    }
+}
