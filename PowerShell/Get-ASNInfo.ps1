@@ -5,6 +5,8 @@
    Author:  Robert Rathbun
 .DESCRIPTION
    Obtain information on ASN of public IP address.  
+
+   Future updates will directly query the RIPE database (https://stat.ripe.net/docs/data_api#AsOverview).
    
 .EXAMPLE
    Get-ASNInfo -IPAddress 8.8.8.8
