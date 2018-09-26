@@ -23,7 +23,7 @@ function Get-ASNInfo
     [Alias()]
     Param
     (
-        # Short or Long format of new username. Short format is <FirstInitial><LastName>.  Long format is <FirstName>.<LastName>.
+        # IP address to inspect.
         [Parameter(Mandatory=$true)]
         [string]$IPAddress
     )
