@@ -55,7 +55,8 @@ function Get-ADLockoutLocation
     Process
     {
         $DCs = Get-ADDomainController -Filter *
-        $PDC = $DCs | ?{$_.OperationMasterRoles -contains "PDCEmulator"}
+        # The PDC role is no longer the sole source for lockout information in a Server 2016 domain.
+            # $PDC = $DCs | Where-Object{$_.OperationMasterRoles -contains "PDCEmulator"}
 
         foreach ($DC in $DCs)
         {
@@ -85,12 +86,14 @@ function Get-ADLockoutLocation
             }
         }
 
-        $LockoutStats | FT -Property Name,LockedOut,DomainController,BadPwdCount,AccountLockoutTime,LastBadPasswordAttempt -AutoSize
+        $LockoutStats | Format-Table -Property Name,LockedOut,DomainController,BadPwdCount,AccountLockoutTime,LastBadPasswordAttempt -AutoSize
 
         Try
         {
-            $LockoutEvents = Get-WinEvent -ComputerName $PDC.Hostname -FilterHashtable @{Logname='Security';Id=4740} `
-                -ErrorAction Stop | Sort-Object -Property TimeCreated -Descending
+            # Lockout events tracked on all DCs, not just the PDC as in previous versions of Windows Server. 
+            # Also, the Event ID is now 4625 instead of 4740.
+            $DCs | ForEach-Object {$LockoutEvents += Get-WinEvent -ComputerName $_.Hostname -FilterHashtable @{Logname='Security';Id=4625} `
+                -ErrorAction Stop | Sort-Object -Property TimeCreated -Descending}
         }
         Catch
         {
@@ -100,14 +103,18 @@ function Get-ADLockoutLocation
 
         foreach ($event in $LockoutEvents)
         {
-            If ($event | ?{$_.Properties[2].value -match $userStats.SID.Value})
+            <# Event properties have changed in Server 2016.
+               Properties[5] will reference the SamAccountName of the user instead of Properties[0] referencing the SID.
+               Properties[13] is where the originating machine name is located as opposed to Properties[1].
+            #>
+                        If ($event | Where-Object {$_.Properties[5].value -match $userStats.SamAccountName})
             {
-                $event | select -Property @(
-                    @{Label = 'User'; Expression = {$_.Properties[0].Value}}
+                $event | Select-Object -Property @(
+                    @{Label = 'User'; Expression = {$_.Properties[5].Value}}
                     @{Label = 'DomainController'; Expression = {$_.MachineName}}
                     @{Label = 'EventId'; Expression = {$_.Id}}
-                    @{Label = 'Message'; Expression = {$_.Message -split "`r" | Select -First 1}}
-                    @{Label = 'LockoutLocation'; Expression = {$_.Properties[1].Value}}
+                    @{Label = 'Message'; Expression = {$_.Message -split "`r" | Select-Object -First 1}}
+                    @{Label = 'LockoutLocation'; Expression = {$_.Properties[13].Value}}
                 )
             }
         }
