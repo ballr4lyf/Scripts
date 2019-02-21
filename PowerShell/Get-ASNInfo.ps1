@@ -108,6 +108,9 @@ function Get-ASNInfo
       }
 
       try {
+        # Force TLS 1.2
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
         $baseURI = "https://stat.ripe.net/data/"
 
         $netinfo = $baseURI + "network-info/data.json?resource=" + $IPAddress
